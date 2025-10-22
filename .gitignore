@@ -1,0 +1,5 @@
+/.github/
+/.venv/
+/build/
+/python_project_50.egg-info/
+/.python-version
