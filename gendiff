@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Small wrapper so users can run the project diff tool as ./gendiff ...
+# It execs the script using its shebang; this avoids requiring the user to type `python3`.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$SCRIPT_DIR/hexlet_code/scripts/gendiff.py" "$@"
