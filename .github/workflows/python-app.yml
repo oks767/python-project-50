@@ -41,7 +41,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.TOKEN_SONAQ }}
       with:
-        project-base-dir: .
+        projectBaseDir: .
         args: >
           -Dsonar.projectKey=oks767_python-project-50
           -Dsonar.organization=oks767
