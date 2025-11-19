@@ -30,13 +30,13 @@ jobs:
         echo "Project structure:"
         find . -name "*.py" -type f | head -20
         echo "Tests found:"
-        find tests -name "*.py" -type f
+        find hexlet_code -name "test_*.py" -type f
         echo "Source files:"
-        find src -name "*.py" -type f
+        find hexlet_code -name "*.py" -type f | grep -v test
     
     - name: Run tests with coverage
       run: |
-        python -m pytest --cov=src --cov-report=xml --cov-report=html --junit-xml=test-results.xml
+        python -m pytest hexlet_code/src/tests/ -v --cov=hexlet_code/src --cov-report=xml --cov-report=html --junit-xml=test-results.xml
     
     - name: Run linter (ruff)
       run: |
@@ -51,8 +51,8 @@ jobs:
       with:
         args: >
           -Dsonar.python.coverage.reportPaths=coverage.xml
-          -Dsonar.tests=tests
-          -Dsonar.test.inclusions=tests/**
-          -Dsonar.sources=src
+          -Dsonar.tests=hexlet_code/src/tests
+          -Dsonar.test.inclusions=hexlet_code/src/tests/**
+          -Dsonar.sources=hexlet_code/src
           -Dsonar.sourceEncoding=UTF-8
           -Dsonar.testExecutionReportPaths=test-results.xml
