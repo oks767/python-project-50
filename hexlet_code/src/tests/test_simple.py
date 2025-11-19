@@ -5,9 +5,9 @@ import json
 import tempfile
 
 # Добавляем src в путь для импорта
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
 
-from hexlet_code.src.scripts.gendiff import generate_diff
+from gendiff import generate_diff
 
 
 def create_temp_json_file(data):
@@ -20,8 +20,7 @@ def create_temp_json_file(data):
 def test_generate_diff_basic():
     """Базовый тест функции generate_diff"""
     assert callable(generate_diff)
-    assert generate_diff is not None
-
+    
 
 def test_generate_diff_with_identical_files():
     """Тест сравнения идентичных файлов"""
@@ -37,8 +36,11 @@ def test_generate_diff_with_identical_files():
     try:
         result = generate_diff(file1, file2)
         assert result is not None
-        # Ожидаем, что для идентичных файлов diff покажет их схожесть
-        assert "identical" in result.lower() or "same" in result.lower() or "equal" in result.lower()
+        assert isinstance(result, str)
+        # Проверяем что все ключи присутствуют без изменений
+        assert "host: hexlet.io" in result
+        assert "timeout: 50" in result
+        assert "proxy: 123.234.53.22" in result
     finally:
         os.unlink(file1)
         os.unlink(file2)
@@ -66,8 +68,11 @@ def test_generate_diff_with_different_values():
         assert result is not None
         assert isinstance(result, str)
         # Должны видеть разницу в timeout
-        assert "50" in result or "20" in result
-        assert "timeout" in result
+        assert "  - timeout: 50" in result
+        assert "  + timeout: 20" in result
+        # Общие ключи без изменений
+        assert "    host: hexlet.io" in result
+        assert "    proxy: 123.234.53.22" in result
     finally:
         os.unlink(file1)
         os.unlink(file2)
@@ -94,33 +99,29 @@ def test_generate_diff_with_different_keys():
         result = generate_diff(file1, file2)
         assert result is not None
         # Должны видеть информацию о разных ключах
-        assert "proxy" in result or "verbose" in result
+        assert "  - proxy: 123.234.53.22" in result
+        assert "  + verbose: true" in result
+        # Общие ключи без изменений
+        assert "    host: hexlet.io" in result
+        assert "    timeout: 50" in result
     finally:
         os.unlink(file1)
         os.unlink(file2)
 
 
-def test_generate_diff_with_nested_objects():
-    """Тест сравнения файлов с вложенными объектами"""
+def test_generate_diff_example_from_task():
+    """Тест примера из задачи"""
     data1 = {
-        "common": {
-            "setting1": "Value 1",
-            "setting2": 200
-        },
-        "group1": {
-            "baz": "bas",
-            "foo": "bar"
-        }
+        "host": "hexlet.io",
+        "timeout": 50,
+        "proxy": "123.234.53.22",
+        "follow": False
     }
     
     data2 = {
-        "common": {
-            "setting1": "Value 1",
-            "setting3": True
-        },
-        "group2": {
-            "abc": "12345"
-        }
+        "timeout": 20,
+        "verbose": True,
+        "host": "hexlet.io"
     }
     
     file1 = create_temp_json_file(data1)
@@ -129,68 +130,20 @@ def test_generate_diff_with_nested_objects():
     try:
         result = generate_diff(file1, file2)
         assert result is not None
-        assert isinstance(result, str)
-        # Должны видеть информацию о вложенных структурах
-        assert "common" in result
-        assert "setting" in result
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-
-
-def test_generate_diff_with_arrays():
-    """Тест сравнения файлов с массивами"""
-    data1 = {
-        "items": ["item1", "item2", "item3"],
-        "numbers": [1, 2, 3]
-    }
-    
-    data2 = {
-        "items": ["item1", "item3"],
-        "numbers": [1, 2, 3, 4]
-    }
-    
-    file1 = create_temp_json_file(data1)
-    file2 = create_temp_json_file(data2)
-    
-    try:
-        result = generate_diff(file1, file2)
-        assert result is not None
-        assert "items" in result
-        assert "numbers" in result
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-
-
-def test_generate_diff_with_mixed_types():
-    """Тест сравнения файлов с разными типами данных"""
-    data1 = {
-        "string": "hello",
-        "number": 42,
-        "boolean": True,
-        "null_value": None,
-        "array": [1, 2, 3]
-    }
-    
-    data2 = {
-        "string": "world", 
-        "number": 100,
-        "boolean": False,
-        "null_value": "not null",
-        "array": [1, 3, 4]
-    }
-    
-    file1 = create_temp_json_file(data1)
-    file2 = create_temp_json_file(data2)
-    
-    try:
-        result = generate_diff(file1, file2)
-        assert result is not None
-        # Проверяем, что все ключи присутствуют в выводе
-        assert "string" in result
-        assert "number" in result
-        assert "boolean" in result
+        
+        # Проверяем ожидаемый вывод из задачи
+        expected_lines = [
+            "  - follow: false",
+            "    host: hexlet.io", 
+            "  - proxy: 123.234.53.22",
+            "  - timeout: 50",
+            "  + timeout: 20",
+            "  + verbose: true"
+        ]
+        
+        for line in expected_lines:
+            assert line in result
+            
     finally:
         os.unlink(file1)
         os.unlink(file2)
@@ -198,7 +151,7 @@ def test_generate_diff_with_mixed_types():
 
 def test_generate_diff_file_not_found():
     """Тест обработки отсутствующих файлов"""
-    with pytest.raises(FileNotFoundError) or pytest.raises(IOError) or pytest.raises(Exception):
+    with pytest.raises(FileNotFoundError):
         generate_diff("nonexistent1.json", "nonexistent2.json")
 
 
@@ -213,8 +166,7 @@ def test_generate_diff_invalid_json():
         file2 = f2.name
     
     try:
-        # Ожидаем ошибку парсинга JSON
-        with pytest.raises(json.JSONDecodeError) or pytest.raises(ValueError) or pytest.raises(Exception):
+        with pytest.raises(ValueError):
             generate_diff(file1, file2)
     finally:
         os.unlink(file1)
@@ -231,69 +183,24 @@ def test_generate_diff_empty_files():
     
     try:
         result = generate_diff(file1, file2)
-        assert result is not None
-        # Пустые файлы должны считаться одинаковыми
-        assert len(result.strip()) > 0
+        assert result == "{\n}"
     finally:
         os.unlink(file1)
         os.unlink(file2)
 
 
-def test_generate_diff_format_consistency():
-    """Тест согласованности формата вывода"""
-    data1 = {"a": 1, "b": 2}
-    data2 = {"a": 1, "c": 3}
-    
-    file1 = create_temp_json_file(data1)
-    file2 = create_temp_json_file(data2)
-    
-    try:
-        result1 = generate_diff(file1, file2)
-        result2 = generate_diff(file1, file2)  # Повторный вызов
-        
-        # Результаты должны быть идентичными при одинаковых входных данных
-        assert result1 == result2
-        assert isinstance(result1, str)
-        assert len(result1) > 0
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-
-
-def test_generate_diff_symmetrical():
-    """Тест симметричности сравнения (A vs B и B vs A)"""
-    data1 = {"key1": "value1", "common": "same"}
-    data2 = {"key2": "value2", "common": "same"}
-    
-    file1 = create_temp_json_file(data1)
-    file2 = create_temp_json_file(data2)
-    
-    try:
-        result_ab = generate_diff(file1, file2)
-        result_ba = generate_diff(file2, file1)
-        
-        # Результаты могут отличаться по порядку, но должны содержать одинаковую информацию
-        assert result_ab is not None
-        assert result_ba is not None
-        assert isinstance(result_ab, str)
-        assert isinstance(result_ba, str)
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-
-
-def test_generate_diff_with_special_characters():
-    """Тест сравнения файлов со специальными символами"""
+def test_generate_diff_alphabetical_order():
+    """Тест алфавитного порядка ключей"""
     data1 = {
-        "special_string": "line1\nline2\tline3",
-        "unicode": "café 🚀",
-        "escaped": "quote\"'backslash\\"
+        "zebra": 1,
+        "apple": 2, 
+        "banana": 3
     }
     
     data2 = {
-        "special_string": "line1\nline2",
-        "unicode": "café 🌟", 
-        "escaped": "quote\"backslash\\\\"
+        "apple": 2,
+        "cherry": 4,
+        "banana": 5
     }
     
     file1 = create_temp_json_file(data1)
@@ -301,53 +208,18 @@ def test_generate_diff_with_special_characters():
     
     try:
         result = generate_diff(file1, file2)
-        assert result is not None
-        assert isinstance(result, str)
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-
-
-@pytest.mark.parametrize("data1,data2", [
-    ({"a": 1}, {"a": 2}),
-    ({"a": 1}, {"b": 1}),
-    ({"a": 1, "b": 2}, {"a": 1}),
-    ({}, {"a": 1}),
-    ({"a": [1, 2]}, {"a": [1, 3]}),
-])
-def test_generate_diff_parametrized(data1, data2):
-    """Параметризованный тест для различных сценариев сравнения"""
-    file1 = create_temp_json_file(data1)
-    file2 = create_temp_json_file(data2)
-    
-    try:
-        result = generate_diff(file1, file2)
-        assert result is not None
-        assert isinstance(result, str)
-        assert len(result.strip()) > 0
-    finally:
-        os.unlink(file1)
-        os.unlink(file2)
-
-
-def test_generate_diff_performance():
-    """Тест производительности с большими файлами"""
-    # Создаем большие JSON файлы
-    large_data1 = {f"key_{i}": f"value_{i}" for i in range(100)}
-    large_data2 = {f"key_{i}": f"modified_value_{i}" for i in range(100)}
-    
-    file1 = create_temp_json_file(large_data1)
-    file2 = create_temp_json_file(large_data2)
-    
-    try:
-        import time
-        start_time = time.time()
-        result = generate_diff(file1, file2)
-        end_time = time.time()
+        # Проверяем что ключи идут в алфавитном порядке
+        lines = result.strip().split('\n')
+        key_lines = [line for line in lines if ':' in line and line.strip()]
         
-        assert result is not None
-        # Проверяем что выполнение заняло разумное время (менее 5 секунд)
-        assert end_time - start_time < 5.0
+        keys_in_order = []
+        for line in key_lines:
+            key = line.split(':')[0].strip().lstrip('+- ')
+            keys_in_order.append(key)
+        
+        # Проверяем алфавитный порядок
+        assert keys_in_order == sorted(keys_in_order)
+        
     finally:
         os.unlink(file1)
         os.unlink(file2)

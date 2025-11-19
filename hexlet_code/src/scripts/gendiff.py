@@ -3,9 +3,56 @@
 
 import argparse
 import json
+from collections import OrderedDict
 
 
-def generate_diff():
+def generate_diff(file_path1, file_path2, format_name="stylish"):
+    """
+    Generate difference between two JSON files.
+    
+    Args:
+        file_path1 (str): Path to first file
+        file_path2 (str): Path to second file
+        format_name (str): Output format (stylish, plain, json)
+    
+    Returns:
+        str: Formatted difference between files
+    """
+    try:
+        with open(file_path1) as f1, open(file_path2) as f2:
+            data1 = json.load(f1)
+            data2 = json.load(f2)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"File not found: {e.filename}")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in file: {e}")
+
+    # Сравнение JSON объектов
+    all_keys = sorted(set(data1.keys()) | set(data2.keys()))
+    diff_lines = []
+
+    for key in all_keys:
+        if key not in data2:
+            # Ключ только в первом файле
+            diff_lines.append(f"  - {key}: {data1[key]}")
+        elif key not in data1:
+            # Ключ только во втором файле
+            diff_lines.append(f"  + {key}: {data2[key]}")
+        elif data1[key] == data2[key]:
+            # Ключ в обоих файлах с одинаковыми значениями
+            diff_lines.append(f"    {key}: {data1[key]}")
+        else:
+            # Ключ в обоих файлах с разными значениями
+            diff_lines.append(f"  - {key}: {data1[key]}")
+            diff_lines.append(f"  + {key}: {data2[key]}")
+
+    # Форматирование вывода
+    result = "{\n" + "\n".join(diff_lines) + "\n}"
+    return result
+
+
+def main():
+    """CLI интерфейс для gendiff"""
     parser = argparse.ArgumentParser(
         description="Скрипт для генерации diff-ов между файлами.",
         epilog="Пример использования: gendiff file1.json file2.json"
@@ -21,31 +68,14 @@ def generate_diff():
 
     args = parser.parse_args()
 
-    with open(args.first_file) as f1, open(args.second_file) as f2:
-        data1 = json.load(f1)
-        data2 = json.load(f2)
-
-    # Сравнение JSON объектов
-    keys = set(data1.keys()).union(data2.keys())
-    result = {}
-
-    for key in keys:
-        if key in data1 and key in data2:
-            if data1[key] != data2[key]:
-                result[key] = f"- {data1[key]}\n+ {data2[key]}"
-        elif key in data1:
-            result[key] = f"- {data1[key]}"
-        else:
-            result[key] = f"+ {data2[key]}"
-
-    # Форматирование вывода
-    output = "{\n"
-    for key, value in result.items():
-        output += f"  {key}: {value}\n"
-    output += "}"
-
-    print(output)
+    try:
+        diff = generate_diff(args.first_file, args.second_file, args.format)
+        print(diff)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    generate_diff()
+    exit(main())
