@@ -6,6 +6,16 @@ import json
 from collections import OrderedDict
 
 
+def format_value(value):
+    """Форматирует значение для вывода (нижний регистр для boolean)"""
+    if isinstance(value, bool):
+        return str(value).lower()
+    elif value is None:
+        return "null"
+    else:
+        return str(value)
+
+
 def generate_diff(file_path1, file_path2, format_name="stylish"):
     """
     Generate difference between two JSON files.
@@ -34,20 +44,24 @@ def generate_diff(file_path1, file_path2, format_name="stylish"):
     for key in all_keys:
         if key not in data2:
             # Ключ только в первом файле
-            diff_lines.append(f"  - {key}: {data1[key]}")
+            diff_lines.append(f"  - {key}: {format_value(data1[key])}")
         elif key not in data1:
             # Ключ только во втором файле
-            diff_lines.append(f"  + {key}: {data2[key]}")
+            diff_lines.append(f"  + {key}: {format_value(data2[key])}")
         elif data1[key] == data2[key]:
             # Ключ в обоих файлах с одинаковыми значениями
-            diff_lines.append(f"    {key}: {data1[key]}")
+            diff_lines.append(f"    {key}: {format_value(data1[key])}")
         else:
             # Ключ в обоих файлах с разными значениями
-            diff_lines.append(f"  - {key}: {data1[key]}")
-            diff_lines.append(f"  + {key}: {data2[key]}")
+            diff_lines.append(f"  - {key}: {format_value(data1[key])}")
+            diff_lines.append(f"  + {key}: {format_value(data2[key])}")
 
     # Форматирование вывода
-    result = "{\n" + "\n".join(diff_lines) + "\n}"
+    if diff_lines:
+        result = "{\n" + "\n".join(diff_lines) + "\n}"
+    else:
+        result = "{}"
+    
     return result
 
 

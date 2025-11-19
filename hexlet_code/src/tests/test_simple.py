@@ -100,7 +100,7 @@ def test_generate_diff_with_different_keys():
         assert result is not None
         # Должны видеть информацию о разных ключах
         assert "  - proxy: 123.234.53.22" in result
-        assert "  + verbose: true" in result
+        assert "  + verbose: true" in result  # true в нижнем регистре
         # Общие ключи без изменений
         assert "    host: hexlet.io" in result
         assert "    timeout: 50" in result
@@ -130,17 +130,17 @@ def test_generate_diff_example_from_task():
     try:
         result = generate_diff(file1, file2)
         assert result is not None
-        
-        # Проверяем ожидаемый вывод из задачи
+    
+        # Проверяем ожидаемый вывод из задачи (с правильным регистром)
         expected_lines = [
-            "  - follow: false",
-            "    host: hexlet.io", 
+            "  - follow: false",      # false в нижнем регистре
+            "    host: hexlet.io",
             "  - proxy: 123.234.53.22",
             "  - timeout: 50",
             "  + timeout: 20",
-            "  + verbose: true"
+            "  + verbose: true"       # true в нижнем регистре
         ]
-        
+    
         for line in expected_lines:
             assert line in result
             
@@ -183,7 +183,7 @@ def test_generate_diff_empty_files():
     
     try:
         result = generate_diff(file1, file2)
-        assert result == "{\n}"
+        assert result == "{}"  # Пустые файлы должны возвращать просто {}
     finally:
         os.unlink(file1)
         os.unlink(file2)
@@ -220,6 +220,35 @@ def test_generate_diff_alphabetical_order():
         # Проверяем алфавитный порядок
         assert keys_in_order == sorted(keys_in_order)
         
+    finally:
+        os.unlink(file1)
+        os.unlink(file2)
+
+
+def test_generate_diff_boolean_formatting():
+    """Тест форматирования boolean значений"""
+    data1 = {
+        "enabled": True,
+        "active": False,
+        "none_value": None
+    }
+    
+    data2 = {
+        "enabled": False,
+        "active": True,
+        "none_value": "not null"
+    }
+    
+    file1 = create_temp_json_file(data1)
+    file2 = create_temp_json_file(data2)
+    
+    try:
+        result = generate_diff(file1, file2)
+        assert "enabled: true" in result
+        assert "enabled: false" in result
+        assert "active: false" in result
+        assert "active: true" in result
+        assert "none_value: null" in result
     finally:
         os.unlink(file1)
         os.unlink(file2)
