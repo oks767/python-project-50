@@ -20,3 +20,7 @@
 ## Запуск тестов
 ```bash
 pytest tests/ -v --cov=src --cov-report=html
+
+## SonarQube
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=oks767_python-project-50&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=oks767_python-project-50)
