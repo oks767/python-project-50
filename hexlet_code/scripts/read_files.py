@@ -21,7 +21,7 @@ print("--------------------------------")
 print("Файл 2")
 print("--------------------------------")
 
-#открываем второй файл для чтения
+# открываем второй файл для чтения
 with open('hexlet_code/json/file2.json', 'r', encoding='utf-8') as file:
     # Парсим JSON из файла
     data = json.load(file)

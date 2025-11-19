@@ -2,7 +2,6 @@
 """Скрипт для генерации diff-ов."""
 
 import argparse
-import sys
 import json
 
 
@@ -22,10 +21,6 @@ def generate_diff():
 
     args = parser.parse_args()
 
-    first_file = args.first_file
-    second_file = args.second_file
-
-    # Чтение и парсинг JSON файлов
     with open(args.first_file) as f1, open(args.second_file) as f2:
         data1 = json.load(f1)
         data2 = json.load(f2)
