@@ -5,7 +5,7 @@ import os
 # Добавляем src в путь для импорта
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from gendiff import generate_diff
+from hexlet_code.src.scripts.gendiff import generate_diff
 
 
 def test_generate_diff_basic():
