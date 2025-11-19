@@ -4,8 +4,19 @@
 # JSON Comparator
 
 ![CI](https://github.com/your-username/your-repo/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://codecov.io/gh/your-username/your-repo/branch/main/graph/badge.svg)
-![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=your-username_your-repo&metric=alert_status)
+![SonarQube Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=your-username_your-repo&metric=alert_status)
+![SonarQube Coverage](https://sonarcloud.io/api/project_badges/measure?project=your-username_your-repo&metric=coverage)
+![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=your-username_your-repo&metric=sqale_rating)
+![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=your-username_your-repo&metric=reliability_rating)
 
 ## Описание
-Утилита для сравнения JSON файлов
+Утилита для сравнения JSON файлов с тестовым покрытием и анализом качества кода.
+
+## Функциональность
+- Сравнение структуры JSON файлов
+- Выявление различий в значениях
+- Генерация отчетов о различиях
+
+## Запуск тестов
+```bash
+pytest tests/ -v --cov=src --cov-report=html
