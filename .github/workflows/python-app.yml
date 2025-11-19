@@ -43,5 +43,5 @@ jobs:
       with:
         projectBaseDir: .
         args: >
-          sonar.projectKey=python-project-50
-          sonar.organization=oks767
+          -Dsonar.projectKey=python-project-50
+          -Dsonar.organization=oks767
