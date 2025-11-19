@@ -3,7 +3,6 @@
 
 import argparse
 import json
-from collections import OrderedDict
 
 
 def format_value(value):
