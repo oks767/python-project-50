@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Важно для SonarQube анализа
+        fetch-depth: 0
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -24,17 +24,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest pytest-cov
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    
-    - name: Check JSON files exist
+        
+    - name: Check project structure
       run: |
-        ls -la *.json
-        test -f file1.json && echo "file1.json exists"
-        test -f file2.json && echo "file2.json exists"
+        echo "Project structure:"
+        find . -name "*.py" -type f | head -20
+        echo "Tests found:"
+        find tests -name "*.py" -type f
+        echo "Source files:"
+        find src -name "*.py" -type f
     
     - name: Run tests with coverage
       run: |
-        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html --junit-xml=test-results.xml
+        python -m pytest --cov=src --cov-report=xml --cov-report=html --junit-xml=test-results.xml
     
     - name: Run linter (ruff)
       run: |
@@ -47,7 +49,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        # Ключевые настройки для покрытия кода
         args: >
           -Dsonar.python.coverage.reportPaths=coverage.xml
           -Dsonar.tests=tests
