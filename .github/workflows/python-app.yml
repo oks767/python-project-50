@@ -45,11 +45,4 @@ jobs:
         args: >
           -Dsonar.projectKey=python-project-50
           -Dsonar.organization=oks767
-          -Dsonar.projectName=python-project-50
-          -Dsonar.python.coverage.reportPaths=coverage.xml
-          -Dsonar.tests=hexlet_code/src/tests
-          -Dsonar.test.inclusions=hexlet_code/src/tests/**
-          -Dsonar.sources=hexlet_code/src
-          -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.testExecutionReportPaths=test-results.xml
-          -Dsonar.coverage.exclusions=hexlet_code/src/tests/**
+          
