@@ -43,7 +43,7 @@ jobs:
       with:
         projectBaseDir: .
         args: >
-          -Dsonar.projectKey=oks767_python-project-50
+          -Dsonar.projectKey=python-project-50
           -Dsonar.organization=oks767
           -Dsonar.projectName=python-project-50
           -Dsonar.python.coverage.reportPaths=coverage.xml
