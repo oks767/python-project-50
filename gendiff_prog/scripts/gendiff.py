@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Скрипт для генерации diff-ов."""
-
+from yaml import safe_load, dump
 import argparse
 import json
 
@@ -16,25 +16,15 @@ def format_value(value):
 
 
 def generate_diff(file_path1, file_path2, format_name="stylish"):
-    """
-    Generate difference between two JSON files.
-    
-    Args:
-        file_path1 (str): Path to first file
-        file_path2 (str): Path to second file
-        format_name (str): Output format (stylish, plain, json)
-    
-    Returns:
-        str: Formatted difference between files
-    """
-    try:
-        with open(file_path1) as f1, open(file_path2) as f2:
-            data1 = json.load(f1)
-            data2 = json.load(f2)
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"File not found: {e.filename}")
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in file: {e}")
+  
+    with open(file_path1) as f1, open(file_path2) as f2:
+        data1 = json.load(f1)
+        data2 = json.load(f2)
+
+    with open(file_path1) as file1, open(file_path2) as file2:
+        data3 = safe_load(file1)
+        data4 = safe_load(file2)
+
 
     # Сравнение JSON объектов
     all_keys = sorted(set(data1.keys()) | set(data2.keys()))
